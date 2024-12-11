@@ -1,8 +1,11 @@
 name: C/C++ CI
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 on:
     push:
-        branches: [ master ]
+        branches: [ main ]
         paths:
             - 'meson.build'
             - 'compat/**'
@@ -11,7 +14,7 @@ on:
             - '.github/workflows/**'
 
     pull_request:
-        branches: [ master ]
+        branches: [ main ]
         paths:
             - 'meson.build'
             - 'compat/**'
@@ -31,11 +34,11 @@ jobs:
               run: |
                   sudo dnf install -y gcc gcc-c++ flex bison meson ninja-build make libedit-devel libcurl-devel libxo-devel openssl-devel
 
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
 
             - name: build and check
               run: |
-                  meson setup build -Db_buildtype=debug
+                  meson setup build --buildtype=debug
                   ninja -C build -v
                   meson test -C build -v
 
@@ -79,10 +82,10 @@ jobs:
                   make
                   make install
 
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
 
             - name: build and check
               run: |
-                  meson setup build --werror -Db_buildtype=debug -Drpmatch_path=/usr/local/lib
+                  meson setup build --werror --buildtype=debug -Drpmatch_path=/usr/local/lib
                   ninja -C build -v
                   meson test -C build -v
